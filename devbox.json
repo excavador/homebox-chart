@@ -1,0 +1,12 @@
+{
+  "packages": {
+    "kubernetes-helm": "latest",
+    "goreleaser": "latest",
+    "just": "latest",
+    "just-lsp": "latest"
+  },
+  "shell": {
+    "init_hook": [],
+    "scripts": {}
+  }
+}

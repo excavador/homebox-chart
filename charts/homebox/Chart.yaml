@@ -1,0 +1,18 @@
+apiVersion: v2
+name: homebox
+description: HomeBox — self-hosted home inventory and organisation system
+type: application
+# Chart version. Bumped independently of appVersion: a chart-only fix
+# does not require a new HomeBox release.
+version: 0.1.0
+# Upstream HomeBox release this chart is tested against. Renovate moves
+# this and the default image tag together.
+appVersion: "0.26.2"
+home: https://github.com/sysadminsmedia/homebox
+sources:
+  - https://github.com/sysadminsmedia/homebox
+  - https://github.com/opwerm/homebox-chart
+keywords: [inventory, homelab, self-hosted]
+maintainers:
+  - name: Oleg Tsarev
+    email: oleg@tsarev.id

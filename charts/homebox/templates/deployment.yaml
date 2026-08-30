@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "homebox.fullname" . }}
+  labels: {{- include "homebox.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  # Recreate, not RollingUpdate: with a ReadWriteOnce volume a second pod
+  # cannot attach while the first holds it, and with sqlite3 two writers
+  # against one file would corrupt it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {{- include "homebox.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "homebox.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: homebox
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 7745
+          env:
+            - name: HBOX_MODE
+              value: production
+            - name: HBOX_WEB_PORT
+              value: "7745"
+            - name: HBOX_STORAGE_PREFIX_PATH
+              value: {{ .Values.persistence.path | quote }}
+            - name: HBOX_OPTIONS_ALLOW_REGISTRATION
+              value: {{ .Values.options.allowRegistration | quote }}
+            - name: HBOX_OPTIONS_ALLOW_LOCAL_LOGIN
+              value: {{ .Values.options.allowLocalLogin | quote }}
+            - name: HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID
+              value: {{ .Values.options.autoIncrementAssetID | quote }}
+            - name: HBOX_OPTIONS_CHECK_GITHUB_RELEASE
+              value: {{ .Values.options.checkGithubRelease | quote }}
+            - name: HBOX_OPTIONS_ALLOW_ANALYTICS
+              value: {{ .Values.options.allowAnalytics | quote }}
+            - name: HBOX_OPTIONS_TRUST_PROXY
+              value: {{ .Values.options.trustProxy | quote }}
+            - name: HBOX_DATABASE_DRIVER
+              value: {{ .Values.database.driver | quote }}
+            {{- if eq .Values.database.driver "postgres" }}
+            - name: HBOX_DATABASE_HOST
+              value: {{ required "database.host is required when driver is postgres" .Values.database.host | quote }}
+            - name: HBOX_DATABASE_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: HBOX_DATABASE_DATABASE
+              value: {{ .Values.database.name | quote }}
+            - name: HBOX_DATABASE_USERNAME
+              value: {{ .Values.database.username | quote }}
+            - name: HBOX_DATABASE_SSL_MODE
+              value: {{ .Values.database.sslMode | quote }}
+            - name: HBOX_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "database.existingSecret is required when driver is postgres" .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretKey }}
+            {{- end }}
+            {{- if .Values.auth.existingSecret }}
+            - name: HBOX_AUTH_API_KEY_PEPPER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.existingSecret }}
+                  key: {{ .Values.auth.existingSecretKey }}
+            {{- end }}
+            {{- if .Values.oidc.enabled }}
+            - name: HBOX_OIDC_ENABLED
+              value: "true"
+            - name: HBOX_OIDC_ISSUER_URL
+              value: {{ required "oidc.issuerUrl is required when oidc.enabled" .Values.oidc.issuerUrl | quote }}
+            - name: HBOX_OIDC_CLIENT_ID
+              value: {{ required "oidc.clientId is required when oidc.enabled" .Values.oidc.clientId | quote }}
+            - name: HBOX_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "oidc.existingSecret is required when oidc.enabled" .Values.oidc.existingSecret }}
+                  key: {{ .Values.oidc.existingSecretKey }}
+            - name: HBOX_OIDC_SCOPE
+              value: {{ .Values.oidc.scope | quote }}
+            - name: HBOX_OIDC_AUTO_REDIRECT
+              value: {{ .Values.oidc.autoRedirect | quote }}
+            - name: HBOX_OIDC_GROUP_CLAIM
+              value: {{ .Values.oidc.groupClaim | quote }}
+            - name: HBOX_OIDC_EMAIL_CLAIM
+              value: {{ .Values.oidc.emailClaim | quote }}
+            - name: HBOX_OIDC_NAME_CLAIM
+              value: {{ .Values.oidc.nameClaim | quote }}
+            - name: HBOX_OIDC_EMAIL_VERIFIED_CLAIM
+              value: {{ .Values.oidc.emailVerifiedClaim | quote }}
+            - name: HBOX_OIDC_VERIFY_EMAIL
+              value: {{ .Values.oidc.verifyEmail | quote }}
+            {{- with .Values.oidc.allowedGroups }}
+            - name: HBOX_OIDC_ALLOWED_GROUPS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.oidc.buttonText }}
+            - name: HBOX_OIDC_BUTTON_TEXT
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet: {path: /api/v1/status, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: {path: /api/v1/status, port: http}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.path }}
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "homebox.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}

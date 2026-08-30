@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      packages: write
+    # Shared pipeline from truvity/ci-workflows (public). `charts` drives
+    # packaging + push; no ko-docker-repo because this repo builds no image.
+    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@v2.16.1
+    with:
+      charts: '["homebox"]'
+      chart-registry: oci://ghcr.io/opwerm/charts

@@ -1,0 +1,122 @@
+# HomeBox — self-hosted home inventory.
+#
+# Environment variables below map to HomeBox's config struct: the `HBOX`
+# prefix followed by the field path, so `Options.AllowLocalLogin` becomes
+# HBOX_OPTIONS_ALLOW_LOCAL_LOGIN. Anything this chart does not model can be
+# added verbatim through `extraEnv`.
+
+image:
+  registry: ghcr.io
+  repository: sysadminsmedia/homebox
+  # Pinned, not `latest`: an inventory you cannot roll back is not a backup.
+  tag: ""            # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+# HomeBox listens on 7745 and serves a liveness endpoint at /api/v1/status.
+service:
+  type: ClusterIP
+  port: 80
+
+## Application options.
+##
+## The two `allow*` defaults are DELIBERATELY the opposite of upstream's.
+## HomeBox ships with open registration and local password login enabled;
+## behind SSO that leaves a self-service signup form and a credential path
+## that bypasses your identity provider. This chart defaults them off and
+## makes enabling them an explicit act.
+options:
+  allowRegistration: false
+  allowLocalLogin: false
+  autoIncrementAssetID: true
+  checkGithubRelease: false
+  allowAnalytics: false
+  # Set true when running behind a reverse proxy or gateway so client IPs
+  # are read from X-Forwarded-For rather than the proxy's address.
+  trustProxy: true
+
+## OpenID Connect.
+##
+## HomeBox requires a client SECRET, so register a confidential (web) client
+## with your provider — not a public/PKCE one. The redirect URI is
+## https://<your-host>/api/v1/users/login/oidc/callback
+oidc:
+  enabled: false
+  issuerUrl: ""
+  clientId: ""
+  # Provide the secret through existingSecret rather than in values.
+  existingSecret: ""
+  existingSecretKey: oidc-client-secret
+  scope: "openid profile email"
+  # Skip HomeBox's own login page and go straight to the provider.
+  autoRedirect: true
+  buttonText: ""
+  ## Group-based authorisation. Leave allowedGroups empty unless your
+  ## provider emits a FLAT list of strings in the claim named below —
+  ## Zitadel, for one, emits an object by default and filtering will not
+  ## work until a flattening action or mapper is in place.
+  allowedGroups: ""
+  groupClaim: "groups"
+  emailClaim: "email"
+  nameClaim: "name"
+  emailVerifiedClaim: "email_verified"
+  verifyEmail: false
+
+## Database. `sqlite3` keeps everything in the PVC; `postgres` is strongly
+## preferred on Kubernetes, because a SQLite file on node-local storage pins
+## the pod to one node for the life of the volume.
+database:
+  driver: sqlite3
+  host: ""
+  port: "5432"
+  name: homebox
+  username: homebox
+  existingSecret: ""
+  existingSecretKey: password
+  sslMode: require
+
+## Storage for attachments, photos and (with sqlite3) the database file.
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""
+  accessModes: [ReadWriteOnce]
+  existingClaim: ""
+  # HBOX_STORAGE_PREFIX_PATH
+  path: /data
+
+## API key pepper — HMAC'd into stored API key hashes so a database-only
+## leak yields nothing usable. It MUST stay stable across restarts:
+## rotating it invalidates every key ever issued. Generate once with
+## `openssl rand -base64 48` and keep it in a secret you control.
+auth:
+  existingSecret: ""
+  existingSecretKey: api-key-pepper
+
+extraEnv: []
+resources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: false
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}
+nameOverride: ""
+fullnameOverride: ""

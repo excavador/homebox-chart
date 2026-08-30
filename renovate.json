@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "description": "HomeBox releases move appVersion; the chart version is bumped by hand when the chart itself changes.",
+      "matchManagers": ["helm-values", "regex"],
+      "matchPackageNames": ["ghcr.io/sysadminsmedia/homebox"],
+      "semanticCommitType": "feat"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^charts/homebox/Chart\\.yaml$/"],
+      "matchStrings": ["appVersion:\\s*\"(?<currentValue>.*)\""],
+      "depNameTemplate": "ghcr.io/sysadminsmedia/homebox",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

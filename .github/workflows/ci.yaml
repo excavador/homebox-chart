@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: Lint
+        run: helm lint charts/homebox
+      - name: Render (sqlite)
+        run: helm template hb charts/homebox >/dev/null
+      - name: Render (postgres + oidc)
+        run: |
+          helm template hb charts/homebox \
+            --set database.driver=postgres \
+            --set database.host=example-rw \
+            --set database.existingSecret=example-db \
+            --set oidc.enabled=true \
+            --set oidc.issuerUrl=https://example.invalid \
+            --set oidc.clientId=example \
+            --set oidc.existingSecret=example-oidc >/dev/null
+      - name: Hardened defaults must stay hardened
+        run: |
+          out=$(helm template hb charts/homebox)
+          echo "$out" | grep -A1 'HBOX_OPTIONS_ALLOW_REGISTRATION' | grep -q '"false"'
+          echo "$out" | grep -A1 'HBOX_OPTIONS_ALLOW_LOCAL_LOGIN'  | grep -q '"false"'
