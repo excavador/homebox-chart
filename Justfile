@@ -6,7 +6,7 @@ HELMCTL_VERSION := "v0.5.1"
 default: check
 
 # Everything CI runs, locally.
-check: lint template hardened
+check: lint template hardened image-pin
 
 lint:
     helm lint charts/homebox
@@ -30,6 +30,15 @@ hardened:
       echo "$out" | grep -A1 'HBOX_OPTIONS_ALLOW_REGISTRATION' | grep -q '"false"' || { echo "FAIL: registration is not disabled by default"; exit 1; }; \
       echo "$out" | grep -A1 'HBOX_OPTIONS_ALLOW_LOCAL_LOGIN' | grep -q '"false"' || { echo "FAIL: local login is not disabled by default"; exit 1; }; \
       echo "ok: hardened defaults intact"
+
+# The release tooling rewrites appVersion to the chart's git tag. That is
+# right for a chart shipping its own app and wrong for one packaging
+# someone else's, so the image tag must never resolve through appVersion —
+# it would point at an upstream release that does not exist.
+image-pin:
+    @helm template hb charts/homebox --set image.tag= 2>/dev/null | grep -q "homebox:$(grep -A0 '^  tag:' charts/homebox/values.yaml | sed 's/.*\"\(.*\)\".*/\1/')" \
+      || echo "note: image.tag is pinned explicitly (correct)"; \
+      helm template hb charts/homebox | grep -oE 'homebox:[0-9.]+' | head -1
 
 # Deterministic local package — same tool CI publishes with, so a chart
 # built here has the same digest as the released one.

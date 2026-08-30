@@ -8,8 +8,12 @@
 image:
   registry: ghcr.io
   repository: sysadminsmedia/homebox
-  # Pinned, not `latest`: an inventory you cannot roll back is not a backup.
-  tag: ""            # defaults to .Chart.AppVersion
+  # Pinned explicitly rather than defaulting to .Chart.AppVersion: the
+  # release tooling rewrites appVersion to the chart's git tag, which is
+  # correct for a chart that ships its own app and wrong for one that
+  # packages someone else's — it would resolve to an upstream tag that
+  # does not exist. Renovate moves this.
+  tag: "0.26.2"
   pullPolicy: IfNotPresent
 
 replicaCount: 1

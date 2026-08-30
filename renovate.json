@@ -12,8 +12,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^charts/homebox/Chart\\.yaml$/"],
-      "matchStrings": ["appVersion:\\s*\"(?<currentValue>.*)\""],
+      "managerFilePatterns": ["/^charts/homebox/values\\.yaml$/"],
+      "matchStrings": ["tag:\\s*\"(?<currentValue>.*)\""],
       "depNameTemplate": "ghcr.io/sysadminsmedia/homebox",
       "datasourceTemplate": "docker"
     }

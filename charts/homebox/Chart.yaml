@@ -10,6 +10,8 @@ type: application
 # This value is a placeholder for local work: at release time helmctl
 # injects the git tag as the authoritative version.
 version: 0.26.3
+# Informational only. The release tooling overwrites this with the chart's
+# git tag, so nothing may depend on it — see image.tag in values.yaml.
 appVersion: "0.26.2"
 home: https://github.com/sysadminsmedia/homebox
 sources:
