@@ -18,9 +18,16 @@ jobs:
     permissions:
       contents: write
       packages: write
-    # Shared pipeline from truvity/ci-workflows (public). `charts` drives
-    # packaging + push; no ko-docker-repo because this repo builds no image.
-    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@v2.16.1
+    # Shared pipeline from truvity/ci-workflows (public, MIT). It runs
+    # goreleaser under devbox, then packages and pushes charts with
+    # helmctl (truvity/ocictl) rather than `helm package` + `helm push`:
+    # helmctl injects the git tag as the chart version and strips the
+    # `created` annotation, so identical content yields an identical
+    # digest and immutable chart tags stay trustworthy across re-releases.
+    #
+    # No `secrets: inherit`: the whole pipeline runs on this repo's own
+    # GITHUB_TOKEN, which is why calling it from a different org works.
+    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@45d837a9aedc12fcad2ee4aa30efb0fa74289b91 # v2.16.3
     with:
       charts: '["homebox"]'
       chart-registry: oci://ghcr.io/opwerm/charts

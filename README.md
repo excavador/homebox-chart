@@ -77,12 +77,27 @@ key ever issued. Generate once and keep it somewhere you control:
 openssl rand -base64 48
 ```
 
+## Versioning
+
+The chart version **tracks the HomeBox release it packages** — chart
+`0.26.2` installs HomeBox `0.26.2`, with no lookup table in between.
+
+Releases are cut by tagging `v<homebox-version>`. The tag is the sole
+version authority: [helmctl](https://github.com/truvity/ocictl) injects it
+as the chart version at publish time and strips the `created` annotation,
+so identical chart content always produces an identical digest and the
+published tags stay immutable across re-releases.
+
 ## Development
 
 ```sh
 devbox shell   # or direnv allow
-just check     # lint + render both database paths
+just check     # lint, render both database paths, assert hardened defaults
+just package   # deterministic package with the same tool CI publishes with
 ```
+
+CI runs the same `just check` inside the same devbox, so tool versions
+cannot drift between your machine and the pipeline.
 
 ## Licence
 

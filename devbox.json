@@ -2,6 +2,7 @@
   "packages": {
     "kubernetes-helm": "latest",
     "goreleaser": "latest",
+    "go": "1.27.0",
     "just": "latest",
     "just-lsp": "latest"
   },
