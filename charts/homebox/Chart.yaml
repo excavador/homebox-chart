@@ -2,14 +2,14 @@ apiVersion: v2
 name: homebox
 description: HomeBox — self-hosted home inventory and organisation system
 type: application
-# The chart version TRACKS the HomeBox release it packages, so `helm
-# install --version 0.26.2` gets you HomeBox 0.26.2 without a lookup table.
+# Chart version is INDEPENDENT semver — it moves for chart changes, while
+# appVersion tracks the HomeBox release. The two started aligned at 0.26.2
+# and diverge from there; a chart-only fix cannot borrow an upstream
+# version it does not correspond to.
 #
 # This value is a placeholder for local work: at release time helmctl
-# injects the git tag as the authoritative version, so tagging v0.26.2 is
-# what actually publishes 0.26.2. Renovate moves appVersion when upstream
-# releases; the tag follows.
-version: 0.26.2
+# injects the git tag as the authoritative version.
+version: 0.26.3
 appVersion: "0.26.2"
 home: https://github.com/sysadminsmedia/homebox
 sources:

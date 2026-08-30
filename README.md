@@ -38,6 +38,17 @@ oidc:
   autoRedirect: true               # skip the local login page
 ```
 
+If an operator provisions the client for you — a Zitadel `OIDCApp` CR, for
+instance — the client **id** is not known when you author values either.
+Leave `clientId` empty and the chart reads it from the same secret:
+
+```yaml
+oidc:
+  existingSecret: homebox-oidc
+  existingSecretKey: oidc-client-secret
+  existingSecretClientIdKey: client-id
+```
+
 Register a **confidential (web) client** — HomeBox requires a client secret,
 so a public/PKCE client will not work. The redirect URI is:
 
@@ -79,10 +90,11 @@ openssl rand -base64 48
 
 ## Versioning
 
-The chart version **tracks the HomeBox release it packages** — chart
-`0.26.2` installs HomeBox `0.26.2`, with no lookup table in between.
+Chart version is **independent semver**; `appVersion` tracks the HomeBox
+release. The two started aligned at `0.26.2` and diverge from there — a
+chart-only fix cannot borrow an upstream version it does not correspond to.
 
-Releases are cut by tagging `v<homebox-version>`. The tag is the sole
+Releases are cut by tagging `v<chart-version>`. The tag is the sole
 version authority: [helmctl](https://github.com/truvity/ocictl) injects it
 as the chart version at publish time and strips the `created` annotation,
 so identical chart content always produces an identical digest and the

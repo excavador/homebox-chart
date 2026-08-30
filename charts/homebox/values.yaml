@@ -44,10 +44,14 @@ options:
 oidc:
   enabled: false
   issuerUrl: ""
+  # Leave clientId empty when an operator provisions the client and writes
+  # the id into the same secret as the client secret — it is then read from
+  # existingSecret/existingSecretClientIdKey instead.
   clientId: ""
   # Provide the secret through existingSecret rather than in values.
   existingSecret: ""
   existingSecretKey: oidc-client-secret
+  existingSecretClientIdKey: client-id
   scope: "openid profile email"
   # Skip HomeBox's own login page and go straight to the provider.
   autoRedirect: true

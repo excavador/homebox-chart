@@ -87,8 +87,19 @@ spec:
               value: "true"
             - name: HBOX_OIDC_ISSUER_URL
               value: {{ required "oidc.issuerUrl is required when oidc.enabled" .Values.oidc.issuerUrl | quote }}
+            {{- if .Values.oidc.clientId }}
             - name: HBOX_OIDC_CLIENT_ID
-              value: {{ required "oidc.clientId is required when oidc.enabled" .Values.oidc.clientId | quote }}
+              value: {{ .Values.oidc.clientId | quote }}
+            {{- else }}
+            # Operators that provision the client (e.g. a Zitadel OIDCApp CR)
+            # write the id alongside the secret, so it is not known when
+            # values are authored.
+            - name: HBOX_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "set oidc.clientId, or oidc.existingSecret to read it from" .Values.oidc.existingSecret }}
+                  key: {{ .Values.oidc.existingSecretClientIdKey }}
+            {{- end }}
             - name: HBOX_OIDC_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
