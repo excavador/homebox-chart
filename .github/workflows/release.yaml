@@ -27,7 +27,14 @@ jobs:
     #
     # No `secrets: inherit`: the whole pipeline runs on this repo's own
     # GITHUB_TOKEN, which is why calling it from a different org works.
-    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@b19968438f6f19b681517c4e2cfcb87fe7887673 # v2.16.3
+    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@49248a6cebd3720ac7f2eaf2e98ec97c0967b3b6 # v2.17.0
     with:
       charts: '["homebox"]'
+      # This chart packages someone else's application, so the release
+      # version means nothing to the image. Left on the default the
+      # tooling stamps the git tag as appVersion, and a chart that
+      # resolves its image from appVersion then points at an upstream tag
+      # that was never published (INF-617). `chart` keeps whatever
+      # Chart.yaml declares.
+      chart-app-version: chart
       chart-registry: oci://ghcr.io/opwerm/charts

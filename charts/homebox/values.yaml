@@ -8,11 +8,12 @@
 image:
   registry: ghcr.io
   repository: sysadminsmedia/homebox
-  # Pinned explicitly rather than defaulting to .Chart.AppVersion: the
-  # release tooling rewrites appVersion to the chart's git tag, which is
-  # correct for a chart that ships its own app and wrong for one that
-  # packages someone else's — it would resolve to an upstream tag that
-  # does not exist. Renovate moves this.
+    # Pinned explicitly rather than defaulting to .Chart.AppVersion.
+    # Since chart-app-version: chart (ci-workflows v2.17.0) appVersion is
+    # no longer rewritten to the git tag, so the default would now be
+    # correct too - but an explicit tag states the upstream release
+    # outright instead of inferring it, and is what Renovate tracks.
+    # Renovate moves this line; appVersion in Chart.yaml moves with it.
   tag: "0.26.2"
   pullPolicy: IfNotPresent
 
