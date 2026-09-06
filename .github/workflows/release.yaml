@@ -37,4 +37,4 @@ jobs:
       # that was never published (INF-617). `chart` keeps whatever
       # Chart.yaml declares.
       chart-app-version: chart
-      chart-registry: oci://ghcr.io/opwerm/charts
+      chart-registry: oci://ghcr.io/excavador/charts

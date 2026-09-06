@@ -8,7 +8,7 @@ self-hosting it on Kubernetes writes their own manifests. This is that work,
 done once.
 
 ```sh
-helm install homebox oci://ghcr.io/opwerm/charts/homebox --version 0.1.0
+helm install homebox oci://ghcr.io/excavador/charts/homebox --version 0.1.0
 ```
 
 ## Hardened by default

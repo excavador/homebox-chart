@@ -1,7 +1,7 @@
 # Chart-only repository: there is no Go binary and no container image to
 # build here — the image belongs to upstream HomeBox. goreleaser's job is
 # the GitHub release and its changelog; chart packaging and the push to
-# ghcr.io/opwerm/charts happen in the release workflow.
+# ghcr.io/excavador/charts happen in the release workflow.
 version: 2
 
 project_name: homebox-chart
@@ -21,4 +21,4 @@ changelog:
 release:
   prerelease: auto
   footer: |
-    Helm chart: `oci://ghcr.io/opwerm/charts/homebox:{{ .Version }}`
+    Helm chart: `oci://ghcr.io/excavador/charts/homebox:{{ .Version }}`

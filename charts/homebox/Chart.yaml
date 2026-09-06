@@ -16,7 +16,7 @@ appVersion: "0.26.2"
 home: https://github.com/sysadminsmedia/homebox
 sources:
   - https://github.com/sysadminsmedia/homebox
-  - https://github.com/opwerm/homebox-chart
+  - https://github.com/excavador/homebox-chart
 keywords: [inventory, homelab, self-hosted]
 maintainers:
   - name: Oleg Tsarev
