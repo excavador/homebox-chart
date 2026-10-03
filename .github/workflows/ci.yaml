@@ -16,7 +16,7 @@ jobs:
 
       # Same devbox environment CI and humans use, so `just check` locally
       # and `just check` here run byte-identical tool versions.
-      - uses: truvity/ci-workflows/.github/actions/setup-devbox@b19968438f6f19b681517c4e2cfcb87fe7887673 # v2.16.3
+      - uses: truvity/ci-workflows/.github/actions/setup-devbox@58d470dff71c732e208f47a80bb6c5d741e016a7 # v3.25.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 

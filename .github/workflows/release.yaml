@@ -27,7 +27,7 @@ jobs:
     #
     # No `secrets: inherit`: the whole pipeline runs on this repo's own
     # GITHUB_TOKEN, which is why calling it from a different org works.
-    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@49248a6cebd3720ac7f2eaf2e98ec97c0967b3b6 # v2.17.0
+    uses: truvity/ci-workflows/.github/workflows/release-public.yaml@58d470dff71c732e208f47a80bb6c5d741e016a7 # v3.25.0
     with:
       charts: '["homebox"]'
       # This chart packages someone else's application, so the release
