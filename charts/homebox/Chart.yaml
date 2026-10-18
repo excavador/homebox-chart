@@ -10,9 +10,11 @@ type: application
 # This value is a placeholder for local work: at release time helmctl
 # injects the git tag as the authoritative version.
 version: 0.26.5
-# Informational only. The release tooling overwrites this with the chart's
-# git tag, so nothing may depend on it — see image.tag in values.yaml.
-appVersion: "0.26.2"
+# Tracks the HomeBox release this chart packages. Since the release runs
+# with chart-app-version: chart (ci-workflows v2.17.0) the tooling no
+# longer rewrites this to the git tag, so it is authoritative — keep it in
+# step with image.tag in values.yaml (Renovate moves the tag, this follows).
+appVersion: "0.27.0"
 home: https://github.com/sysadminsmedia/homebox
 sources:
   - https://github.com/sysadminsmedia/homebox
